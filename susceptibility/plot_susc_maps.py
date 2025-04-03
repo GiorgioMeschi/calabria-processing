@@ -16,7 +16,7 @@ def plot_susc(fires, total_ba, outfolder, tr1, tr2, year, month):
     if not os.path.exists(outputlike):
         settings = dict(
             fires_file= fires,
-            fires_col= 'date_iso',
+            fires_col= 'finaldate', # 'date_iso',
             crs= 'epsg:3857',
             susc_path= path,
             xboxmin_hist= 0.2,
@@ -35,7 +35,7 @@ def plot_susc(fires, total_ba, outfolder, tr1, tr2, year, month):
             allow_hist= True,
             allow_pie= True,
             allow_fires= True,
-            normalize_over_y_axis= 13,
+            normalize_over_y_axis= 60,
             limit_barperc_to_show= 2,
         )
 
@@ -46,13 +46,14 @@ def plot_susc(fires, total_ba, outfolder, tr1, tr2, year, month):
 if __name__ == '__main__':
 
     fft = ff.FireTools()
-    fires_file = '/home/sadc/share/project/calabria/data/raw/burned_area/incendi_dpc_2007_2023_calabria_3857.shp'
+    # fires_file = '/home/sadc/share/project/calabria/data/raw/burned_area/incendi_dpc_2007_2023_calabria_3857.shp'
+    fires_file = '/home/sadc/share/project/calabria/data/raw/burned_area/2024_effis/calabria_effis_2024.shp'
     total_ba = gpd.read_file(fires_file).area.sum() / 10000
     tr_path = '/home/sadc/share/project/calabria/data/susceptibility/v4/thresholds/thresholds.json'
     thresholds = json.load(open(tr_path))
     tr1, tr2 = thresholds['lv1'], thresholds['lv2']
 
-    with multiprocessing.Pool(processes=20) as pool:
+    with multiprocessing.Pool(processes=8) as pool:
         pool.starmap(
             plot_susc,
             [
@@ -65,7 +66,7 @@ if __name__ == '__main__':
                     year,
                     month
                 )
-                for year in range(2007, 2024)
+                for year in [2024] #range(2007, 2024)
                 for month in range(1, 13)
             ]
         )
@@ -73,6 +74,7 @@ if __name__ == '__main__':
 
 
 #%%  merge pngs by year
+
 import os
 from geospatial_tools import geotools as gt
 
@@ -81,7 +83,7 @@ Img = gt.Imtools()
 
 basep = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG'
 out_folder = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG/MERGED'
-years = list(range(2007, 2024))
+years = [2024] # list(range(2008, 2024))
 months = list(range(1, 13))
 
 os.makedirs(out_folder, exist_ok=True)
@@ -92,7 +94,24 @@ for year in years:
     year_files = [f"{basep}/{filename}.png" for filename in year_filenames]
 
     fig = Img.merge_images(year_files, ncol=4, nrow=3)
-    fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
+    # fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
+    # save image (Image object)
+    fig.save(f"{out_folder}/susc_plot_{year}.png")
+    
 
 
 
+#%% merge the merged
+
+
+inp = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG/MERGED'
+filesname = os.listdir(inp)
+# exclude 2007
+filesname = [f for f in filesname if f.startswith('susc_plot_') and f != 'susc_plot_2007.png']
+files = [f for f in filesname if f.endswith('.png')] 
+
+merged_fig = Img.merge_images([f"{inp}/{f}" for f in files], ncol=4, nrow=4)
+merged_fig.save(f"{inp}/susc_plot_2008-2023.png")
+
+
+#%%
