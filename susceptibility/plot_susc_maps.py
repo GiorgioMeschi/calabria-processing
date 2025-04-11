@@ -88,15 +88,25 @@ months = list(range(1, 13))
 
 os.makedirs(out_folder, exist_ok=True)
 
-for year in years:
-    yearmonths = [f"{year}{month}" for month in months]
-    year_filenames = [f'susc_plot_{m}' for m in yearmonths]
-    year_files = [f"{basep}/{filename}.png" for filename in year_filenames]
+yearmonths = [f"{year}{month}" for year in years for month in months]
+year_filenames = [f'susc_plot_{yrm}' for yrm in yearmonths]
+year_files = [f"{basep}/{filename}.png" for filename in year_filenames]
 
-    fig = Img.merge_images(year_files, ncol=4, nrow=3)
-    # fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
-    # save image (Image object)
-    fig.save(f"{out_folder}/susc_plot_{year}.png")
+fig = Img.merge_images(year_files, ncol=12, nrow=6)
+# fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
+# save image (Image object)
+fig.save(f"{out_folder}/susc_plot_2008-2023.png")
+
+
+# for year in years:
+#     yearmonths = [f"{year}{month}" for month in months]
+#     year_filenames = [f'susc_plot_{m}' for m in yearmonths]
+#     year_files = [f"{basep}/{filename}.png" for filename in year_filenames]
+
+#     fig = Img.merge_images(year_files, ncol=4, nrow=3)
+#     # fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
+#     # save image (Image object)
+#     fig.save(f"{out_folder}/susc_plot_{year}.png")
     
 
 
@@ -104,14 +114,14 @@ for year in years:
 #%% merge the merged
 
 
-inp = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG/MERGED'
-filesname = os.listdir(inp)
-# exclude 2007
-filesname = [f for f in filesname if f.startswith('susc_plot_') and f != 'susc_plot_2007.png']
-files = [f for f in filesname if f.endswith('.png')] 
+# inp = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG/MERGED'
+# filesname = os.listdir(inp)
+# # exclude 2007
+# filesname = [f for f in filesname if f.startswith('susc_plot_') and f != 'susc_plot_2007.png']
+# files = [f for f in filesname if f.endswith('.png')] 
 
-merged_fig = Img.merge_images([f"{inp}/{f}" for f in files], ncol=4, nrow=4)
-merged_fig.save(f"{inp}/susc_plot_2008-2023.png")
+# merged_fig = Img.merge_images([f"{inp}/{f}" for f in files], ncol=4, nrow=4)
+# merged_fig.save(f"{inp}/susc_plot_2008-2023.png")
 
 
 #%%
