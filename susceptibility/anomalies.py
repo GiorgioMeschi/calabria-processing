@@ -91,6 +91,7 @@ yearmonths = [f"{year}_{month}" for year in years for month in months]
 year_filenames = [f'anomaly_{yrm}' for yrm in yearmonths]
 year_files = [f"{basep}/{filename}.png" for filename in year_filenames]
 
+
 fig = Img.merge_images(year_files, ncol=12, nrow=18)
 # fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
 # save image (Image object)
