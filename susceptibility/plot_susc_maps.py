@@ -83,7 +83,7 @@ Img = gt.Imtools()
 
 basep = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG'
 out_folder = '/home/sadc/share/project/calabria/data/susceptibility/v4/PNG/MERGED'
-years = [2024] # list(range(2008, 2024))
+years = list(range(2007, 2025))
 months = list(range(1, 13))
 
 os.makedirs(out_folder, exist_ok=True)
@@ -92,10 +92,10 @@ yearmonths = [f"{year}{month}" for year in years for month in months]
 year_filenames = [f'susc_plot_{yrm}' for yrm in yearmonths]
 year_files = [f"{basep}/{filename}.png" for filename in year_filenames]
 
-fig = Img.merge_images(year_files, ncol=12, nrow=6)
+fig = Img.merge_images(year_files, ncol=12, nrow=18)
 # fig.savefig(f"{out_folder}/susc_plot_{year}.png", dpi=500, bbox_inches='tight')
 # save image (Image object)
-fig.save(f"{out_folder}/susc_plot_2008-2023.png")
+fig.save(f"{out_folder}/susc_plot_2007-2024.png")
 
 
 # for year in years:

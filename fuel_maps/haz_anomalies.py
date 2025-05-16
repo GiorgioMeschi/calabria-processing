@@ -74,37 +74,61 @@ df.to_csv(outpath, index=False)
 
 import matplotlib.pyplot as plt
 
+df = pd.read_csv(outpath)
+
 df['date'] = pd.to_datetime(df['year_month'].str.replace('_', '-'))
+base_vals = [h3_static, h6_static, h9_static, h12_static]
+base_vals = [i * 0.04 for i in base_vals] # convert to ha
 
-plt.figure(figsize=(30, 8), dpi = 200)
+for cl, color, base_val in zip(cls, ['green', 'yellow', 'violet', 'red'], base_vals):
 
-# Curve delle anomalie
-plt.plot(df['date'], df['h3'], label='Anomalia Classe 3', linewidth=1.2, marker='o')
-plt.plot(df['date'], df['h6'], label='Anomalia Classe 6', linewidth=1.2, marker='s')
-plt.plot(df['date'], df['h9'], label='Anomalia Classe 9', linewidth=1.2, marker='^')
-plt.plot(df['date'], df['h12'], label='Anomalia Classe 12', linewidth=1.2, marker='d')
+    fig, ax = plt.subplots(figsize=(30, 8), dpi = 200)
 
-# Secondo asse y per l'area bruciata
-ax1 = plt.gca()
-ax2 = ax1.twinx()
-ax2.plot(df['date'], df['area_ha'], color='black', label='Area Bruciata (ha)', linewidth=2, linestyle='--')
+    # Curve delle anomalie
+    ax.plot(df['date'], df[f'h{cl}'], label=f'Anomalia Classe {cl}', linewidth=1.2, color = color)
+    # plt.plot(df['date'], df['h6'], label='Anomalia Classe 6', linewidth=1.2, marker='s')
+    # plt.plot(df['date'], df['h9'], label='Anomalia Classe 9', linewidth=1.2, marker='^')
+    # plt.plot(df['date'], df['h12'], label='Anomalia Classe 12', linewidth=1.2, marker='d')
 
-# Stile e labels
-ax1.set_title("Trend delle Anomalie di Copertura e Aree Bruciate", fontsize=16)
-ax1.set_xlabel("Data", fontsize=12)
-ax1.set_ylabel("Anomalia (%)", fontsize=12)
-ax2.set_ylabel("Area Bruciata (ha)", fontsize=12)
-ax1.set_xticks(df['date'])
-ax1.set_xticklabels(df['date'].dt.strftime('%Y-%m'), rotation=90, fontsize=8)
-ax1.set_xlim(xmax= df['date'].max())
+    # Secondo asse y per l'area bruciata
+    # ax = plt.gca()
+    ax2 = ax.twinx()
+    ax2.plot(df['date'], df['area_ha'], color='black', label='Area Bruciata (ha)', linewidth=2, linestyle='--')
 
-# Legenda combinata
-lines_1, labels_1 = ax1.get_legend_handles_labels()
-lines_2, labels_2 = ax2.get_legend_handles_labels()
-plt.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper left')
+    # Stile e labels
+    ax.set_title(f"Trend delle Anomalie della fuel map e Aree Bruciate - CLASSE {cl}", fontsize=16)
+    ax.set_xlabel("Data", fontsize=12)
+    ax.set_ylabel("Anomalia (%)", fontsize=12)
+    ax2.set_ylabel("Area Bruciata (ha)", fontsize=12)
+    ax.set_xticks(df['date'])
+    ax.set_xticklabels(df['date'].dt.strftime('%Y-%m'), rotation=90, fontsize=8)
+    ax.set_xlim(xmax= df['date'].max())
 
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.tight_layout()
-#save
-plt.savefig(f'{haz_monthly_folder}/anomalies/anomalies_plot.png', dpi=200)
+    ax2.set_yticks(np.arange(-100, df['area_ha'].max() * 1.1, 2000))
+    ax2.set_yticklabels(np.arange(-100, df['area_ha'].max() * 1.1, 2000), fontsize=8)
+
+
+    ax.set_ylim(-100, 100)
+    ax2.set_ylim(-100, df['area_ha'].max() * 1.1)
+
+
+    # put horizzontal line at 0
+    ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
+
+    # y label of 0 change with another number
+    ax.set_yticks(np.arange(-100, 600, 100))
+    y_ticks = [ str(i) for i in np.arange(-100, 600, 100) ]
+    y_ticks[1] = f'{int(base_val)} ha'
+    ax.set_yticklabels(y_ticks, fontsize=8)
+
+
+    # Legenda combinata
+    lines_1, labels_1 = ax.get_legend_handles_labels()
+    lines_2, labels_2 = ax2.get_legend_handles_labels()
+    plt.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper left')
+
+    plt.tight_layout()
+    #save
+    fig.savefig(f'{haz_monthly_folder}/anomalies/anomalies_plot_{cl}.png', dpi=200, bbox_inches='tight')
+    
 
