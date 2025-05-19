@@ -69,8 +69,30 @@ with rio.open(out_file) as veg:
             dst.write(_tile)
 
 
+#%% create a unique veg map of calabria with the fuel types already in the shapefile
+
+import json
+
+veg_file = '/home/sadc/share/project/calabria/data/raw/vegetation/carta natura.shp'
+ml_codes_mapping_file = '/home/sadc/share/project/calabria/data/raw/vegetation/veg_to_ft_v2.json'
+out_file = '/home/sadc/share/project/calabria/data/raw/vegetation/fuel_type.tif'
+reference_file = '/home/sadc/share/project/calabria/data/raw/dem/dem_calabria_20m_3857.tif'
 
 
+veg = gpd.read_file(veg_file)
+mapping = json.load(open(ml_codes_mapping_file))
+# mapping
+veg['ft'] = veg['COD_ISPRA'].map(mapping)
+# crs
+veg = veg.to_crs('EPSG:3857')
+#rasterizing
+Raster = gt.Raster()
+veg_arr = Raster.rasterize_gdf_as(veg, reference_file, column = 'ft', all_touched = False)
+# all not burnable as no data
+# veg_arr[veg_arr == 0] = 1
+
+# save
+Raster.save_raster_as(veg_arr, out_file, reference_file, nodata = 0, dtype = np.int8())
 
 
 
